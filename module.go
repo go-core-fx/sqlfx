@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/go-core-fx/fxutil"
+	"github.com/go-core-fx/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -13,8 +13,7 @@ import (
 func Module() fx.Option {
 	return fx.Module(
 		"db",
-		fxutil.WithNamedLogger("db"),
-		fx.Provide(New),
+		logger.WithNamedLogger("db"),
 		fx.Invoke(func(lc fx.Lifecycle, db *sql.DB, logger *zap.Logger) {
 			lc.Append(fx.Hook{
 				OnStart: func(ctx context.Context) error {
