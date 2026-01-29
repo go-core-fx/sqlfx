@@ -27,9 +27,17 @@ func New(cfg Config) (*sql.DB, error) {
 		if err != nil {
 			return nil, err
 		}
-	case "sqlite3":
-		driverName = "sqlite3"
-		dsn = u.Path
+	case "sqlite3", "sqlite":
+		driverName = u.Scheme
+		// Per RFC 8089: sqlite3:///abs/path uses triple-slash for absolute paths
+		// Preserve the leading slash for absolute paths; only strip for relative host-based paths
+		if u.Host != "" && u.Host != "localhost" {
+			// Relative path: host indicates relative (e.g., "." in sqlite3://./rel/path)
+			dsn = u.Host + u.Path
+		} else {
+			// Absolute path (u.Path already has leading /) or opaque path (no leading /)
+			dsn = u.Path
+		}
 		if raw := u.RawQuery; raw != "" {
 			dsn = fmt.Sprintf("%s?%s", dsn, raw)
 		}
